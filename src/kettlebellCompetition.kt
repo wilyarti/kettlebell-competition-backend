@@ -9,7 +9,12 @@ import net.opens3.db_username
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import io.ktor.routing.Route
+import io.ktor.sessions.get
+import io.ktor.sessions.sessions
+import os3.MySession
+import os3.Success
 import os3.connectToDB
+import os3.thisUser
 
 
 object KettleBellPresses : Table() {
@@ -55,9 +60,13 @@ fun connectToDB(): Unit {
 }
 fun Route.kettlebellCompetition() {
     post("/api/addSet") {
+        val thisSession = call.sessions.get<MySession>()
         try {
             val addSet = call.receive<thisSet>()
             val remoteHost: String = call.request.origin.remoteHost
+            if (thisSession?.id != addSet.uuid) {
+                throw (error("Access not permitted."))
+            }
             connectToDB()
             transaction {
                 SchemaUtils.create(KettleBellPresses)
@@ -74,13 +83,21 @@ fun Route.kettlebellCompetition() {
         }
     }
     get("/api/getUserList") {
-        call.respond(getUserList())
+        val thisSession = call.sessions.get<MySession>()
+        var userName: String
+        if (thisSession !== null) {
+            userName = thisSession.username
+            val userList = getUserList()
+            call.respond(userList)
+        } else {
+            call.respond(Success(false))
+        }
+
     }
     get ("/api/getKettlebellPresses") {
         call.respond(kettlebellPresses());
     }
 }
-
 fun getUserList(): MutableList<userID> {
     connectToDB()
     var returnedListOfUsers = mutableListOf<userID>()
@@ -96,6 +113,7 @@ fun getUserList(): MutableList<userID> {
     }
     return returnedListOfUsers
 }
+
 fun kettlebellPresses(): MutableList<thisSet> {
     connectToDB()
     var returnedListOfSets = mutableListOf<thisSet>()

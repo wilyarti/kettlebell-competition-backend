@@ -58,9 +58,10 @@ fun authUser(thisName: String): String? {
     }
     return returnedPassword
 }
-fun getUser(thisName: String): MutableList<thisUser> {
+fun getUser(thisName: String): thisUser? {
     connectToDB()
-    var returnedUserList = mutableListOf<thisUser>()
+    var returnedUserList: thisUser?
+    returnedUserList = null
     transaction {
         SchemaUtils.create(Users)
         for (user in Users.select({ Users.name eq thisName })) {
@@ -69,7 +70,7 @@ fun getUser(thisName: String): MutableList<thisUser> {
                 name = user[Users.name],
                 password = user[Users.password]
             )
-            returnedUserList.add(returnedUser)
+            returnedUserList = returnedUser
         }
     }
     return returnedUserList
@@ -180,10 +181,14 @@ private fun Authentication.Configuration.configureFormAuth() {
             // Realistically you'd look up the user in a database or something here; this is just a toy example.
             // The values here will be whatever was submitted in the form.
             val password = authUser(cred.name);
-            if (password != null && password == cred.name) {
-                val userInfo = getUser(cred.name)[0]
-                MySession(id = userInfo.id, username = userInfo.name)
+            println("Username: ${cred.name} Password: ${cred.password} : ${password}")
+            val userInfo = getUser(cred.name)
+
+            if (password !== null && password == cred.password && userInfo !== null) {
+                println("Session validated....")
+                MySession(id = userInfo!!.id, username = userInfo!!.name)
             } else {
+                println("Invalid login....")
                 null
             }
         }

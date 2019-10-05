@@ -9,6 +9,7 @@ import io.ktor.routing.*
 import io.ktor.sessions.clear
 import io.ktor.sessions.sessions
 import io.ktor.sessions.set
+import kettlebellCompetition
 import kotlinx.html.*
 
 internal fun Routing.homepageRoute() {
@@ -22,6 +23,7 @@ internal fun Routing.homepageRoute() {
                 call.respondRedirect(CommonRoutes.PROFILE)
             }
         }
+        kettlebellCompetition()
     }
 }
 
