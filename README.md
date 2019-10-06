@@ -1,7 +1,7 @@
-# cms
-New OpenS3 Content Management System. Written in Kotlin. 
+# Kettlebell Competition Backend
+A ktor server running the necessary API to run the kettlebell-competion app.
 
-Intended for a few projects. Eliminated the need for tons of JS on the front end.
+It connects to a MySQL database and exchanges data with the front end.
 
 ## Building
 Run 
